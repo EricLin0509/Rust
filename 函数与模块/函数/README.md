@@ -50,7 +50,7 @@ fn get_full_name(first: &str, last: &str) -> String {
 }
 ```
 
-此是会有警告
+此时会有警告
 
 ```
 function `get_full_name` is never used
