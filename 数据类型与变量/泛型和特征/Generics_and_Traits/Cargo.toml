@@ -1,0 +1,6 @@
+[package]
+name = "Generics_and_Traits"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
