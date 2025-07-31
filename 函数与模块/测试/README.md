@@ -243,3 +243,96 @@ test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; fini
 ```
 note: test did not panic as expected
 ```
+
+### 忽略测试
+
+有时，我们只想运行部分测试，忽略其他测试。可以使用 `ignore` 注解来忽略测试
+
+```rust
+#[test]
+#[ignore] // 忽略测试
+fn ignored_test() {
+    assert_eq!(1 + 1, 3);
+}
+```
+
+如果运行 `cargo test` 命令，则不会运行 `ignored_test` 测试
+
+如果想运行所有测试，包括忽略的测试，可以使用 `--ignored` 参数
+
+```
+cargo test -- --ignored
+```
+
+### 集成测试
+
+集成测试是指测试多个模块或多个函数的集成情况
+
+我们要在 cargo 项目根目录下创建一个 `tests` 文件夹，并在其中创建一个 `.rs` 文件，用来编写集成测试
+
+一般情况下，cargo 会自动检测将根目录变成一个 crate，并编译成可执行文件
+
+```rust
+// tests/integration_test.rs
+
+use Test::add; // 导入要测试的模块
+
+#[test]
+fn test_add() {
+    assert_eq!(add(2, 3), 5);
+    assert_eq!(add(10, 0), 10);
+    assert_eq!(add(-1, -2), -3);
+}
+```
+
+- **注意：集成测试只能在测试公开接口时使用，不能测试私有接口**
+
+
+#### 集成测试模块
+
+例如现在我们要在集成测试中添加一个 `common` 模块
+
+如果我们直接在 `tests` 文件夹下创建 `common.rs` 文件，会导致 cargo **将它识别成一个集成测试**
+
+```rust
+// tests/common.rs
+
+pub fn setup() {
+    println!("setup");
+}
+```
+
+```
+Running tests/common.rs (target/debug/deps/common-b9b7236f69a53017)
+```
+
+如果我们想让它成为一个独立的模块，需要创建一个 `common` 文件夹，并在其中创建一个 `mod.rs` 文件，用来导出 `setup` 函数
+
+```rust
+// tests/common/mod.rs
+
+pub fn setup() {
+    println!("setup");
+}
+```
+
+
+```rust
+// tests/integration_test.rs
+
+use Test::add;
+
+mod common;
+
+#[test]
+fn test_add() {
+    common::setup();
+    assert_eq!(add(2, 3), 5);
+    assert_eq!(add(10, 0), 10);
+    assert_eq!(add(-1, -2), -3);
+}
+```
+
+```
+Running tests/integration_test.rs (target/debug/deps/integration_test-b9b7236f69a53017)
+```
